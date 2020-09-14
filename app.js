@@ -6,7 +6,12 @@ const app = express();
 app.use(morgan('dev'));
 
 app.get('/', (req, res) => {
-    res.send('Hello Express! Everything is installed and ready to rock!');
+    //If you type "http://localhost:8000/?name=oscar" in your browswer
+    //Query starts after the ?
+    //Log what we get from our query
+    console.log(req.query);
+    const name = req.query.name;
+    res.send(`Hello Express! Everything is installed and ready to rock and roll! Hello, ${name}`);
 });
 
 app.listen(8000, () => {
