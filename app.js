@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 /* eslint-disable indent */
 const express = require('express');
 const morgan = require('morgan');
@@ -13,7 +14,7 @@ app.get('/', (req, res) => {
     var name = req.query.name;
     //If there is no name, ask for one
     if(!name){
-        name = "(please pass in a parameter in the url above:\nname=yourname)"
+        name = "(please pass in a parameter in the url above:\nname=yourname)";
     }
     res.send(`Hello Express! Everything is installed and ready to rock and roll! Hello, ${name}`);
 });
