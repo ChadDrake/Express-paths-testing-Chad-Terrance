@@ -1,76 +1,45 @@
-/* eslint-disable quotes */
-/* eslint-disable indent */
+const store = require("./store");
 const express = require("express");
 const morgan = require("morgan");
-
+const { allowedNodeEnvironmentFlags } = require("process");
+const { sort } = require("./store");
+let apps = [...store];
 const app = express();
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
-  //If you type "http://localhost:8000/?name=oscar" in your browser
-  //Query starts after the ?
-  //Log what we get from our query
-  console.log(req.query);
-  var name = req.query.name;
-  //If there is no name, ask for one
-  if (!name) {
-    name = "(please pass in a parameter in the url above:\nname=yourname)";
-  }
-  res.send(
-    `Hello Express! Everything is installed and ready to rock and roll! Hello, ${name}`
-  );
+  res.send("welcome home");
 });
-
-app.get("/cipher", (req, res) => {
-  const text = req.query.text;
-  const shift = parseInt(req.query.shift);
-  let textCipherArr = [];
-  let textCipherEncryptedArr = [];
-  for (let i = 0; i < text.length; i++) {
-    textCipherArr.push(text[i].charCodeAt(0) + shift);
+app.get("/apps", (req, res) => {
+  let { sort, genres } = req.query;
+  if (sort && sort !== "Rating" && sort !== "App") {
+    return res
+      .status(400)
+      .json({ message: "Sort must be either rating or app" });
+  } else if (sort) {
+    apps = apps.sort((a, b) => {
+      if (a[sort] < b[sort]) {
+        return -1;
+      } else if (a[sort] > b[sort]) {
+        return 1;
+      } else return 0;
+    });
   }
-  for (let i = 0; i < textCipherArr.length; i++) {
-    textCipherEncryptedArr.push(String.fromCharCode(textCipherArr[i]));
+  let allowedGenres = [
+    "Action",
+    "Puzzle",
+    "Strategy",
+    "Casual",
+    "Arcade",
+    "Card",
+  ];
+  if (genres && !allowedGenres.includes(genres)) {
+    return res.status(400).json({ message: "Genre must be something else" });
+  } else if (genres) {
+    apps = apps.filter((app) => {
+      return app.Genres.includes(genres);
+    });
   }
-  textCipherEncryptedArr = textCipherEncryptedArr.join("");
-  res.send(textCipherEncryptedArr);
+  res.json(apps);
 });
-
-app.get("/lotto", (req, res) => {
-  const userNumbers = req.query.arr;
-  let lotto = [];
-  for (let i = 0; i < 6; i++) {
-    lotto.push(Math.floor(Math.random() * Math.floor(20)));
-  }
-  let matches = 0;
-  for (let i = 0; i < 6; i++) {
-    if (parseInt(userNumbers[i]) === lotto[i]) {
-      matches = matches + 1;
-    }
-  }
-  let result = "";
-  if (matches < 4) {
-    result = "Sorry, you lose again";
-  } else if (matches === 4) {
-    result = "Congratulations, you win a free ticket";
-  } else if (matches === 5) {
-    result = "Congratulations! You win $100!";
-  } else if (matches === 6) {
-    result = "If only this were a real ticket...";
-  }
-  res.send(result);
-});
-
-app.get("/sum", (req, res) => {
-  console.log(req.query);
-  console.log("/sum endpoint");
-  const a = parseInt(req.query.a);
-  const b = parseInt(req.query.b);
-  const result = a + b;
-  res.send(JSON.stringify(result));
-});
-
-app.listen(8080, () => {
-  console.log("Express server is listening on port 8080");
-});
-//console.log("works");
+module.exports = app;
